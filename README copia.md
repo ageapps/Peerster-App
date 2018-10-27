@@ -1,5 +1,5 @@
-# Peerster-App
-Peerster Frontend App
+# app
+
 ## Project setup
 ```
 npm install
