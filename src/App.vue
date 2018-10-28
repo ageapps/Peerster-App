@@ -202,7 +202,7 @@ export default {
     exit(){
         clearInterval(this.messageTimerID);
         clearInterval(this.peerTimerID);
-        this.peers = []
+        this.nodes = []
         this.messages = []
         this.name = ""
         this.address = ""

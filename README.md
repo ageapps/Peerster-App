@@ -1,5 +1,8 @@
 # Peerster-App
-Peerster Frontend App
+Frontend App for the [Peerster](https://github.com/ageapps/Peerster) project. Its a very basic interface developed in `Vue` to launch gossipers, connect to others and see exchanged messages.
+
+![](./app.gif)
+
 ## Project setup
 ```
 npm install
