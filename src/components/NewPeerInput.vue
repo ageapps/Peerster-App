@@ -14,9 +14,6 @@
 <script>
 export default {
   name: 'NewPeerInput',
-  props: {
-    msg: String
-  },
   methods: {
     addPeer(){
       if(this.peerAdress){
