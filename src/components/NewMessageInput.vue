@@ -10,6 +10,9 @@
         <div v-show="isprivate" type="button">
           <input type="text" class="form-control" placeholder="Destination" aria-label="Recipient's destination" aria-describedby="button-addon2"  v-model="destination">
         </div>
+        <div v-show="!isprivate" type="button">
+          <input type="file" class="form-control" placeholder="File" aria-label="Recipient's file" aria-describedby="button-addon3"  v-on:change="uploadFile">
+        </div>
 
       </div>
     </div>
@@ -39,6 +42,9 @@ export default {
         this.newMessage = ''
         this.destination = ''
       }
+    },
+    uploadFile(){
+
     }
   },
   data(){
