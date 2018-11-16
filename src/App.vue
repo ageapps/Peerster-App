@@ -11,20 +11,13 @@
         <button type="button" class="btn btn-outline-danger" @click="deletePeer" >Delete this Peer</button>
         <div class="row">
           <div class="col-md-6 col-sm-12">
-            <NewMessageInput @new-message="onNewMessage" />
-            <NewMessageInput v-bind:peers="nodes" isprivate @new-message="onNewMessage" />
-          </div>
-          <div class="col-md-6 col-sm-12">
-            <NewPeerInput @new-peer="onNewPeer"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6 col-sm-12">
+            <NewMessageInput title="Send Message" @new-message="onNewMessage" />
+            <NewMessageInput title="Send Private Message" v-bind:peers="hops" isprivate @new-message="onNewMessage" />
+            <PeerList v-bind:peers="nodes"  title="Peers connected"/>
             <MessageList v-bind:messages="messages"  title="Messages"/>
           </div>
           <div class="col-md-6 col-sm-12">
-            <PeerList v-bind:peers="nodes"  title="Peers connected"/>
+            <NewPeerInput @new-peer="onNewPeer"/>
             <HopsList v-bind:peers="hops"  title="Hops"/>
             <PrivateList v-bind:messages="privateMesages"  title="Private Messages"/>
           </div>
