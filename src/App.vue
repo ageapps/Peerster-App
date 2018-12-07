@@ -13,6 +13,7 @@
           <div class="col-md-6 col-sm-12">
             <NewMessageInput title="Send Message" @new-message="onNewMessage" />
             <NewMessageInput title="Send Private Message" v-bind:peers="hops" isprivate @new-message="onNewMessage" />
+            <UploadInput title="Upload File" @upload-file="onUpload" />
             <PeerList v-bind:peers="nodes"  title="Peers connected"/>
             <MessageList v-bind:messages="messages"  title="Messages"/>
           </div>
@@ -35,6 +36,7 @@
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import NewMessageInput from './components/NewMessageInput.vue'
+import UploadInput from './components/UploadInput.vue'
 import NewPeerInput from './components/NewPeerInput.vue'
 import PeerList from './components/PeerList.vue'
 import HopsList from './components/HopsList.vue'
@@ -51,6 +53,7 @@ export default {
   components: {
     HelloWorld,
     NewMessageInput,
+    UploadInput,
     NewPeerInput,
     PeerList,
     HopsList,
@@ -62,7 +65,7 @@ export default {
     return {
       name: 'nodeA',
       address: '0.0.0.0:0000',
-      started: false,
+      started: true,
       messages: [],
       nodes: [],
       hops: {},
@@ -93,6 +96,20 @@ export default {
         return
       })      
       this.peers.push(data)
+    },
+    onUpload(data){
+      let formData = new FormData();
+      formData.append('file', data.file);
+      axios.post( BACKEND_URL+ '/upload',formData,
+      {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+      }).then(() => {
+        this.showAlert("File uploaded!")
+      }).catch(() => {
+        this.showAlert("Error uploading the file!")
+      });
     },
     onNewMessage(data){
       // console.log("New Message: " + data)
