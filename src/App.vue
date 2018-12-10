@@ -13,12 +13,14 @@
           <div class="col-md-6 col-sm-12">
             <NewMessageInput title="Send Message" @new-message="onNewMessage" />
             <NewMessageInput title="Send Private Message" v-bind:peers="hops" isprivate @new-message="onNewMessage" />
+            <NewRequestInput title="Request MetaHash" v-bind:peers="hops" @new-request="onNewRequest" />
             <UploadInput title="Upload File" @upload-file="onUpload" />
             <PeerList v-bind:peers="nodes"  title="Peers connected"/>
             <MessageList v-bind:messages="messages"  title="Messages"/>
           </div>
           <div class="col-md-6 col-sm-12">
             <NewPeerInput @new-peer="onNewPeer"/>
+            <FileList v-bind:files="files" v-bind:baseurl="baseurl"  title="Files"/>
             <HopsList v-bind:peers="hops"  title="Hops"/>
             <PrivateList v-bind:messages="privateMesages"  title="Private Messages"/>
           </div>
@@ -36,10 +38,12 @@
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import NewMessageInput from './components/NewMessageInput.vue'
+import NewRequestInput from './components/NewRequestInput.vue'
 import UploadInput from './components/UploadInput.vue'
 import NewPeerInput from './components/NewPeerInput.vue'
 import PeerList from './components/PeerList.vue'
 import HopsList from './components/HopsList.vue'
+import FileList from './components/FileList.vue'
 import PrivateList from './components/PrivateList.vue'
 import MessageList from './components/MessageList.vue'
 import PeerForm from './components/PeerForm.vue'
@@ -53,10 +57,12 @@ export default {
   components: {
     HelloWorld,
     NewMessageInput,
+    NewRequestInput,
     UploadInput,
     NewPeerInput,
     PeerList,
     HopsList,
+    FileList,
     PrivateList,
     MessageList,
     PeerForm,
@@ -65,9 +71,10 @@ export default {
     return {
       name: 'nodeA',
       address: '0.0.0.0:0000',
-      started: true,
+      started: false,
       messages: [],
       nodes: [],
+      files: {},
       hops: {},
       privateMesages: {},
       loading: false,
@@ -77,6 +84,8 @@ export default {
       peerTimerID: "",
       hopsTimerID: "",
       privateTimerID: "",
+      filesTimerID: "",
+      baseurl: BACKEND_URL,
     }
   },
   methods: {
@@ -100,6 +109,7 @@ export default {
     onUpload(data){
       let formData = new FormData();
       formData.append('file', data.file);
+      formData.append('name', this.name);
       axios.post( BACKEND_URL+ '/upload',formData,
       {
         headers: {
@@ -133,6 +143,25 @@ export default {
         return
       })      
     },
+    onNewRequest(data){
+      // console.log("New Message: " + data)
+      var url = BACKEND_URL+"/request";
+      var params = {
+        name: this.name,
+        file: data.fileName,
+        destination: data.destination,
+        hash: data.requestHash
+      }
+      this.loading = true;
+      axios.post( url, params)
+      .then(()  =>  {
+        this.loading = false;
+      }, (error)  =>  {
+        this.loading = false;
+        this.showAlert(error.message);
+        return
+      })      
+    },
     startPeer(data){
       this.loading = true;
       var params = {
@@ -158,6 +187,7 @@ export default {
       this.startGettingPrivateMessages();    
       this.startGettingPeers();    
       this.startGettingHops();    
+      this.startGettingFiles();    
     },
     deletePeer(){
       this.loading = true;
@@ -186,6 +216,11 @@ export default {
     startGettingMessages(){
       this.messageTimerID = setInterval(() => {  
         this.getMessages()
+      },REFRESH_PERIOD * 1000);
+    },
+    startGettingFiles(){
+      this.filesTimerID = setInterval(() => {  
+        this.getFiles()
       },REFRESH_PERIOD * 1000);
     },
     startGettingPrivateMessages(){
@@ -236,6 +271,14 @@ export default {
         }
       });
     },
+    getFiles(){
+      var url = BACKEND_URL+"/files";
+      this.getData(url, (data) => {
+        if (data) {
+          this.files = data;
+        }
+      });
+    },
     getData(url, cb){
       var params = {
         name: this.name
@@ -260,7 +303,9 @@ export default {
         clearInterval(this.peerTimerID);
         clearInterval(this.hopsTimerID);
         clearInterval(this.privateTimerID);
+        clearInterval(this.filesTimerID);
         this.nodes = []
+        this.files = {}
         this.messages = []
         this.hops = {}
         this.privateMesages = {}

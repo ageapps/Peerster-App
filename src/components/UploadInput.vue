@@ -18,7 +18,7 @@
 <script>
 
 export default {
-  name: 'NewMessageInput',
+  name: 'UploadInput',
   props: {
     title: String,
   },
