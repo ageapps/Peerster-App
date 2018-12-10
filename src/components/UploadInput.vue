@@ -2,35 +2,25 @@
     <div class="card">
       <div class="card-body">
         <div class="input-group mb-3">
-          <div v-show="isprivate" class="input-group-prepend">
-            <button @click="toggleDropdown" class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{selectedHop}}</button>
-            <div v-bind:style="{ display: dropdownDisplay }" class="dropdown-menu">
-              <a v-for="(peer,key) in peers" :key = "key" class="dropdown-item" @click="selectNode(key)" >
-              {{key}}
-              </a>
-            </div>
+          <div class="input-group-prepend">
+            <button class="btn btn-outline-secondary" @click="toggleUpload()" type="button" id="button-addon2">Select File</button>
           </div>
-          <input type="text" class="form-control" :placeholder="title" aria-label="Recipient's username" aria-describedby="button-addon2"  v-model="newMessage">
+          <input hidden type="file"  class="form-control" id="file" ref="file" v-on:change="handleFileUpload()"/>
+          <input disabled type="text"  class="form-control" :placeholder="title" v-model="fileName"/>
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" @click="addMessage" type="button" id="button-addon2">Send</button>
+            <button class="btn btn-outline-secondary" @click="submitFile()" type="button" id="button-addon2">Upload</button>
           </div>
         </div>
-
-
       </div>
     </div>
 </template>
 
 <script>
+
 export default {
   name: 'NewMessageInput',
   props: {
     title: String,
-    peers: Object,
-    isprivate: {
-      type: Boolean,
-      default: false
-    }
   },
   methods: {
     selectNode(peer){
@@ -53,14 +43,26 @@ export default {
         this.newMessage = ''
         this.destination = ''
       }
-    }
+    },
+    handleFileUpload(){
+      this.file = this.$refs.file.files[0];
+      this.fileName=this.file.name
+    },
+    toggleUpload(){
+      var elem = this.$refs.file
+      elem.click()
+    },
+    submitFile(){
+      var data ={
+          file: this.file,
+        }
+      this.$emit('upload-file', data)
+    },
   },
   data(){
     return {
-      newMessage: '',
-      destination: '',
-      dropdownDisplay: 'none',
-      selectedHop: 'Peers'
+      file: '',
+      fileName: ''
     }
   }
 }

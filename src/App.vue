@@ -11,19 +11,16 @@
         <button type="button" class="btn btn-outline-danger" @click="deletePeer" >Delete this Peer</button>
         <div class="row">
           <div class="col-md-6 col-sm-12">
-            <NewMessageInput @new-message="onNewMessage" msg="Welcome to Your Vue.js App"/>
-          </div>
-          <div class="col-md-6 col-sm-12">
-            <NewPeerInput @new-peer="onNewPeer" msg="Welcome to Your Vue.js App"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6 col-sm-12">
+            <NewMessageInput title="Send Message" @new-message="onNewMessage" />
+            <NewMessageInput title="Send Private Message" v-bind:peers="hops" isprivate @new-message="onNewMessage" />
+            <UploadInput title="Upload File" @upload-file="onUpload" />
+            <PeerList v-bind:peers="nodes"  title="Peers connected"/>
             <MessageList v-bind:messages="messages"  title="Messages"/>
           </div>
           <div class="col-md-6 col-sm-12">
-            <PeerList v-bind:peers="nodes"  title="Peers connected"/>
+            <NewPeerInput @new-peer="onNewPeer"/>
+            <HopsList v-bind:peers="hops"  title="Hops"/>
+            <PrivateList v-bind:messages="privateMesages"  title="Private Messages"/>
           </div>
         </div>
       </div>
@@ -39,21 +36,28 @@
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import NewMessageInput from './components/NewMessageInput.vue'
+import UploadInput from './components/UploadInput.vue'
 import NewPeerInput from './components/NewPeerInput.vue'
 import PeerList from './components/PeerList.vue'
+import HopsList from './components/HopsList.vue'
+import PrivateList from './components/PrivateList.vue'
 import MessageList from './components/MessageList.vue'
 import PeerForm from './components/PeerForm.vue'
 import axios from 'axios';
 
 
 var BACKEND_URL = "http://localhost:8080"
+var REFRESH_PERIOD = 5
 export default {
   name: 'app',
   components: {
     HelloWorld,
     NewMessageInput,
+    UploadInput,
     NewPeerInput,
     PeerList,
+    HopsList,
+    PrivateList,
     MessageList,
     PeerForm,
   },
@@ -61,14 +65,18 @@ export default {
     return {
       name: 'nodeA',
       address: '0.0.0.0:0000',
-      started: false,
+      started: true,
       messages: [],
       nodes: [],
+      hops: {},
+      privateMesages: {},
       loading: false,
       alerting: false,
       alertText: "",
       messageTimerID: "",
       peerTimerID: "",
+      hopsTimerID: "",
+      privateTimerID: "",
     }
   },
   methods: {
@@ -89,14 +97,33 @@ export default {
       })      
       this.peers.push(data)
     },
+    onUpload(data){
+      let formData = new FormData();
+      formData.append('file', data.file);
+      axios.post( BACKEND_URL+ '/upload',formData,
+      {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+      }).then(() => {
+        this.showAlert("File uploaded!")
+      }).catch(() => {
+        this.showAlert("Error uploading the file!")
+      });
+    },
     onNewMessage(data){
       // console.log("New Message: " + data)
+      var url = BACKEND_URL+"/message";
       var params = {
         name: this.name,
-        msg: data
+        msg: data.message
+      }
+      if (data.destination){
+        params.destination = data.destination
+        url = BACKEND_URL+"/private";
       }
       this.loading = true;
-      axios.post(BACKEND_URL+"/message", params)
+      axios.post( url, params)
       .then((response)  =>  {
         this.loading = false;
         this.messages = response.data;
@@ -128,7 +155,9 @@ export default {
         return
       })
       this.startGettingMessages();    
+      this.startGettingPrivateMessages();    
       this.startGettingPeers();    
+      this.startGettingHops();    
     },
     deletePeer(){
       this.loading = true;
@@ -157,53 +186,84 @@ export default {
     startGettingMessages(){
       this.messageTimerID = setInterval(() => {  
         this.getMessages()
-      },3 * 1000);
+      },REFRESH_PERIOD * 1000);
+    },
+    startGettingPrivateMessages(){
+      this.privateTimerID = setInterval(() => {  
+        this.getPrivateMessages()
+      },REFRESH_PERIOD * 1000);
     },
     startGettingPeers(){
       this.peerTimerID = setInterval(() => {  
         this.getPeers()
-      },3 * 1000);
+      },REFRESH_PERIOD * 1000);
+    },
+    startGettingHops(){
+      this.hopsTimerID = setInterval(() => {  
+        this.getHops()
+      },REFRESH_PERIOD * 1000);
     },
     getMessages(){
-      var params = {
-      name: this.name
-      }
-      this.loading = true;
-      axios.get(BACKEND_URL+"/message", {
-        params:params
-      }).then((response)  =>  {
-        this.loading = false;
-        this.messages = response.data;
-      }, (error)  =>  {
-        this.loading = false;
-        this.exit()
-        this.showAlert(error.message);
-        return
-      });    
+      var url = BACKEND_URL+"/message";
+      this.getData(url, (data) => {
+        if (data) {
+          this.messages = data;
+        }
+      }); 
+    },
+    getPrivateMessages(){
+      var url = BACKEND_URL+"/private";
+      this.getData(url, (data) => {
+        if (data) {
+          // console.log(data)
+          this.privateMesages = data;
+        }
+      }); 
     },
     getPeers(){
+      var url = BACKEND_URL+"/node";
+      this.getData(url, (data) => {
+        if (data) {
+          this.nodes = data;
+        }
+      });
+    },
+    getHops(){
+      var url = BACKEND_URL+"/routes";
+      this.getData(url, (data) => {
+        if (data) {
+          this.hops = data;
+        }
+      });
+    },
+    getData(url, cb){
       var params = {
-      name: this.name
+        name: this.name
       }
       this.loading = true;
-      axios.get(BACKEND_URL+"/node", {
+      axios.get(url, {
         params:params
       }).then((response)  =>  {
         // console.log(response)
         this.loading = false;
-        this.nodes = response.data;
+        cb(response.data)
       }, (error)  =>  {
         this.loading = false;
         this.exit()
         this.showAlert(error.message);
-        return
+        cb(null)
       });    
     },
+    
     exit(){
         clearInterval(this.messageTimerID);
         clearInterval(this.peerTimerID);
+        clearInterval(this.hopsTimerID);
+        clearInterval(this.privateTimerID);
         this.nodes = []
         this.messages = []
+        this.hops = {}
+        this.privateMesages = {}
         this.name = ""
         this.address = ""
         this.started = false
