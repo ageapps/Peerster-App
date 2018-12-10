@@ -14,9 +14,7 @@
           <div class="input-group">
             <input type="text" class="form-control" placeholder="File name" aria-label="File name" aria-describedby="button-addon2" v-model="fileName">
           </div>
-          <div class="input-group">
-            <button class="btn btn-outline-secondary" @click="sendRequest" type="button" id="button-addon2">Send</button>
-          </div>
+          <button class="btn btn-outline-secondary" @click="sendRequest" type="button" id="button-addon2">Send</button>
         </div>
 
 
@@ -68,5 +66,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.btn{
+  width: 100%;
+}
 </style>
