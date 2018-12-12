@@ -19,7 +19,8 @@
             <MessageList v-bind:messages="messages"  title="Messages"/>
           </div>
           <div class="col-md-6 col-sm-12">
-            <NewPeerInput @new-peer="onNewPeer"/>
+            <SimpleInput title="Add new peer" submittext="Add" @new-input="onNewPeer"/>
+            <SimpleInput title="Keyboards: txt,file..." submittext="Search" @new-input="onNewSearch"/>
             <FileList v-bind:files="files" v-bind:baseurl="baseurl"  title="Files"/>
             <HopsList v-bind:peers="hops"  title="Hops"/>
             <PrivateList v-bind:messages="privateMesages"  title="Private Messages"/>
@@ -40,7 +41,7 @@ import HelloWorld from './components/HelloWorld.vue'
 import NewMessageInput from './components/NewMessageInput.vue'
 import NewRequestInput from './components/NewRequestInput.vue'
 import UploadInput from './components/UploadInput.vue'
-import NewPeerInput from './components/NewPeerInput.vue'
+import SimpleInput from './components/SimpleInput.vue'
 import PeerList from './components/PeerList.vue'
 import HopsList from './components/HopsList.vue'
 import FileList from './components/FileList.vue'
@@ -59,7 +60,7 @@ export default {
     NewMessageInput,
     NewRequestInput,
     UploadInput,
-    NewPeerInput,
+    SimpleInput,
     PeerList,
     HopsList,
     FileList,
@@ -105,6 +106,21 @@ export default {
         return
       })      
       this.peers.push(data)
+    },
+    onNewSearch(data){
+      // console.log("New Peer: " + data)
+       var params = {
+        name: this.name,
+        search: data
+      }
+      axios.post(BACKEND_URL+"/search", params)
+      .then(()  =>  {
+        this.loading = false;
+      }, (error)  =>  {
+        this.loading = false;
+        this.showAlert(error.message);
+        return
+      })      
     },
     onUpload(data){
       let formData = new FormData();

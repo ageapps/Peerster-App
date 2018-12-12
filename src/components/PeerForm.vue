@@ -16,14 +16,14 @@
     <hr class="my-4">
     <p>This will create a gossipper peer that will start gossiping with all the nodes in the network</p>
     <PeerList v-show="newPeers.length>0" removable @remove-peer="removePeer" v-bind:peers="newPeers"  title="Peers to connect"/>
-    <NewPeerInput @new-peer="onNewPeer" msg="Welcome to Your Vue.js App"/>
+    <SimpleInput  title="New peer" submittext="Add" @new-input="onNewPeer" msg="Welcome to Your Vue.js App"/>
     <button :disabled="isValid" class="btn btn-primary btn-lg" @click="createPeer" type="button">Create</button>
   </div>
 </template>
 
 <script>
 import PeerList from './PeerList.vue'
-import NewPeerInput from './NewPeerInput.vue'
+import SimpleInput from './SimpleInput.vue'
 
 export default {
   name: 'PeerForm',
@@ -31,7 +31,7 @@ export default {
     msg: String
   },
   components: {
-    NewPeerInput,
+    SimpleInput,
     PeerList,
   },
   data(){
