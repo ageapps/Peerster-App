@@ -2,9 +2,9 @@
     <div class="card">
       <div class="card-body">
         <div class="input-group mb-3">
-          <input type="text" class="form-control" :placeholder="title" aria-label="New peer address" aria-describedby="button-addon2" v-model="searchText">
+          <input type="text" class="form-control" @keyup.enter="trigger" :placeholder="title" aria-label="New peer address" aria-describedby="button-addon2" v-model="searchText">
           <div class="input-group-append">
-            <button class="btn btn-primary" @click="addPeer" type="button" id="button-addon2">{{submittext}}</button>
+            <button class="btn btn-primary" ref="sendButton" @click="addPeer" type="button" id="button-addon2">{{submittext}}</button>
           </div>
         </div>
       </div>
@@ -25,6 +25,9 @@ export default {
         this.$emit('new-input',this.searchText)
         this.searchText = ''
       }
+    },
+    trigger () {
+    	this.$refs.sendButton.click()
     }
   },
   data(){

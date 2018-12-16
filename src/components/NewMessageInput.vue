@@ -10,9 +10,9 @@
               </a>
             </div>
           </div>
-          <input type="text" class="form-control" :placeholder="title" aria-label="Recipient's username" aria-describedby="button-addon2"  v-model="newMessage">
+          <input type="text" class="form-control" @keyup.enter="trigger" :placeholder="title" aria-label="Recipient's username" aria-describedby="button-addon2"  v-model="newMessage">
           <div class="input-group-append">
-            <button class="btn btn-outline-secondary" @click="addMessage" type="button" id="button-addon2">Send</button>
+            <button class="btn btn-outline-secondary" ref="sendButton" @click="addMessage" type="button" id="button-addon2">Send</button>
           </div>
         </div>
 
@@ -40,6 +40,9 @@ export default {
     },
     toggleDropdown(){
       this.dropdownDisplay = this.dropdownDisplay == 'none' ? 'block' : 'none'
+    },
+    trigger () {
+    	this.$refs.sendButton.click()
     },
     addMessage(){
       if(this.newMessage){

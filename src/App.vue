@@ -21,7 +21,7 @@
           <div class="col-md-6 col-sm-12">
             <SimpleInput title="Add new peer" submittext="Add" @new-input="onNewPeer"/>
             <SimpleInput title="Keyboards: txt,file..." submittext="Search" @new-input="onNewSearch"/>
-            <FileList v-bind:files="files" v-bind:baseurl="baseurl"  title="Files"/>
+            <FileList v-bind:files="files" v-bind:baseurl="baseurl"  title="Files" @request-file="onNewSearch"/>
             <HopsList v-bind:peers="hops"  title="Hops"/>
             <PrivateList v-bind:messages="privateMesages"  title="Private Messages"/>
           </div>
